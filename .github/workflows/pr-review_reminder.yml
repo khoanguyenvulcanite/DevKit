@@ -1,0 +1,73 @@
+name: PR merge reminder
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # every 5 minutes, UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  remind-open-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify all open PRs that are not merged
+        uses: actions/github-script@v7
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const prs = await github.paginate(
+              github.rest.pulls.list,
+              {
+                owner,
+                repo,
+                state: "open",
+                per_page: 100
+              }
+            );
+
+            if (prs.length === 0) {
+              core.info("No open PRs.");
+              return;
+            }
+
+            const lines = prs.map(
+              pr => `• <${pr.html_url}|#${pr.number} ${pr.title}> — by \`${pr.user?.login ?? "unknown"}\``
+            );
+
+            const payload = {
+              text: `PR merge reminder: ${prs.length} open PR(s) not merged yet`,
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: `*PR merge reminder*\n${prs.length} PR(s) are still open and not merged yet.`
+                  }
+                },
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: lines.join("\n")
+                  }
+                }
+              ]
+            };
+
+            const response = await fetch(process.env.SLACK_WEBHOOK_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+              const body = await response.text();
+              core.setFailed(`Slack webhook failed: ${response.status} ${body}`);
+            }

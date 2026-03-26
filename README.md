@@ -60,5 +60,18 @@ to-do:
         gateway architecture
         webhook/cronjob 
 
+        add skills into slack : 
+            on https://api.slack.com/apps , add slash command, ex : /review_pr
+            create skills inside openclaw : create folder /review_pr inside ~/.openclaw, inside folder 
+            /review_pr create SKILLS.md, then paste in the description of the skill.
+            restart openclaw gateway, reinstall slack app, and slack 
+            --> que : why i cant access other repo details
+        slack notification : GitHub Actions chạy theo lịch + Slack Incoming Webhook.
+            step 1 : tao slack incoming webhook cho channel #dev-test, sau do se co 1 url la A
+            step 2 : luu webhook vao github secrets
+                trong repo github : settings → Secrets and variables → Actions → New repository secret
+                tao secret ten ABC, paste url A vo 
+            step 3 : tao workflow chay theo lich 
+                tao file :  .github/workflows/pr-review-reminder.yml
+                
 
-test pull request
