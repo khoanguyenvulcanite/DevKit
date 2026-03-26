@@ -2,7 +2,7 @@ name: PR review reminder
 
 on:
   schedule:
-    - cron: "*/5 * * * *"   # every hour, UTC
+    - cron: "*/5 * * * *"   # every 5 minutes, UTC
   workflow_dispatch:
 
 permissions:
@@ -13,7 +13,7 @@ jobs:
   remind-stale-prs:
     runs-on: ubuntu-latest
     steps:
-      - name: Check open PRs older than 24h with no reviews
+      - name: Check open PRs older than 30 minutes with no reviews
         uses: actions/github-script@v7
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -59,28 +59,28 @@ jobs:
                   title: pr.title,
                   url: pr.html_url,
                   author: pr.user?.login ?? "unknown",
-                  hoursOpen: Math.floor(ageMs / (60 * 60 * 1000))
+                  minutesOpen: Math.floor(ageMs / (60 * 1000))
                 });
               }
             }
 
             if (stale.length === 0) {
-              core.info("No PRs older than 24h without review.");
+              core.info("No PRs older than 30 minutes without review.");
               return;
             }
 
             const lines = stale.map(
-              pr => `• <${pr.url}|#${pr.number} ${pr.title}> — opened ${pr.hoursOpen}h ago by \`${pr.author}\``
+              pr => `• <${pr.url}|#${pr.number} ${pr.title}> — opened ${pr.minutesOpen} minutes ago by \`${pr.author}\``
             );
 
             const payload = {
-              text: `PR review reminder: ${stale.length} open PR(s) older than 24h with no review`,
+              text: `PR review reminder: ${stale.length} open PR(s) older than 30 minutes with no review`,
               blocks: [
                 {
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: `*PR review reminder*\n${stale.length} open PR(s) have been open for more than 24 hours with *no review*.`
+                    text: `*PR review reminder*\n${stale.length} open PR(s) have been open for more than *30 minutes* with *no review*.`
                   }
                 },
                 {
