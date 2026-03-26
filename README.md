@@ -54,3 +54,11 @@ to-do:
     key-words:
         gateway architecture
         webhook/cronjob 
+
+        add skills into slack : 
+            on https://api.slack.com/apps , add slash command, ex : /review_pr
+            create skills inside openclaw : create folder /review_pr inside ~/.openclaw, inside folder 
+            /review_pr create SKILLS.md, then paste in the description of the skill.
+            restart openclaw gateway, reinstall slack app, and slack 
+            --> que : why i cant access other repo details
+        slack notification : GitHub Actions chạy theo lịch + Slack Incoming Webhook.

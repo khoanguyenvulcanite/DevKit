@@ -1,0 +1,105 @@
+name: PR review reminder
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # every hour, UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  remind-stale-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check open PRs older than 24h with no reviews
+        uses: actions/github-script@v7
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const now = Date.now();
+            const cutoffMs = 24 * 60 * 60 * 1000;
+
+            const prs = await github.paginate(
+              github.rest.pulls.list,
+              {
+                owner,
+                repo,
+                state: "open",
+                per_page: 100
+              }
+            );
+
+            const stale = [];
+
+            for (const pr of prs) {
+              const createdAt = new Date(pr.created_at).getTime();
+              const ageMs = now - createdAt;
+
+              if (ageMs < cutoffMs) continue;
+
+              const reviews = await github.paginate(
+                github.rest.pulls.listReviews,
+                {
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  per_page: 100
+                }
+              );
+
+              if (reviews.length === 0) {
+                stale.push({
+                  number: pr.number,
+                  title: pr.title,
+                  url: pr.html_url,
+                  author: pr.user?.login ?? "unknown",
+                  hoursOpen: Math.floor(ageMs / (60 * 60 * 1000))
+                });
+              }
+            }
+
+            if (stale.length === 0) {
+              core.info("No PRs older than 24h without review.");
+              return;
+            }
+
+            const lines = stale.map(
+              pr => `• <${pr.url}|#${pr.number} ${pr.title}> — opened ${pr.hoursOpen}h ago by \`${pr.author}\``
+            );
+
+            const payload = {
+              text: `PR review reminder: ${stale.length} open PR(s) older than 24h with no review`,
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: `*PR review reminder*\n${stale.length} open PR(s) have been open for more than 24 hours with *no review*.`
+                  }
+                },
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: lines.join("\n")
+                  }
+                }
+              ]
+            };
+
+            const response = await fetch(process.env.SLACK_WEBHOOK_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+              const body = await response.text();
+              core.setFailed(`Slack webhook failed: ${response.status} ${body}`);
+            }
