@@ -1,0 +1,71 @@
+OpenClaw
+    a revolutionary open-source AI agent that enables users to automate complex,
+     24/7 tasks locally, offering unprecedented, flexible control compared to closed, paid AI services
+
+
+    can probably youtube this 
+
+overview:
+    User / External System
+        ↓
+    Channels (UI, API, integrations)
+            ↓
+    Gateway (entry point, routing, auth)
+            ↓
+    Agent (Pi / orchestrator)
+            ↓
+    Tools / MCP (execution layer)
+            ↓
+    Models (LLMs / ML services)
+            ↓
+    Data / External systems
+
+
+OpenClaw:
+    features: https://docs.openclaw.ai/concepts/features#full-list
+        channels : whatsapp, telegram, discord with a single gateway
+        plugins : Add Mattermost and more with extensions. 
+        routing : multi-agent routing with isolated sessions
+        media : 
+        apps and ui :  
+        mobile nodes :
+    
+    gateway architecture:
+        single entry point 
+    
+
+    nodes : execution device 
+        User
+        ↓
+        Gateway
+        ↓
+        Agent hiểu cần info của device
+        ↓
+        Gateway gọi node.invoke("device.battery")
+        ↓
+        Node trên máy Mac đọc battery status
+        ↓
+        trả về 62%
+        ↓
+        Gateway trả lại user
+    
+
+system prompt : https://docs.openclaw.ai/concepts/system-prompt
+    prompt cua he thong : tooling, safety, skills, documentation, workspace files 
+context : https://docs.openclaw.ai/concepts/context
+    tất cả dữ liệu mà OpenClaw đưa vào model mỗi lần chạy
+
+context engine : https://docs.openclaw.ai/concepts/context-engine
+    ingest : thu thap du lieu 
+    assemble : tong hop du lieu (co addition system prompt, history, relevant messages (information))
+    compact : called when the context window is full, or when the user run 
+    after run : luu user data, ... 
+
+agent workspace : 
+
+
+
+
+    
+    
+    

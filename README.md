@@ -44,8 +44,13 @@ to-do:
     weekly target
         hieu sau van de 
             nhan noti, them code agent, hieu them ve cac architecture loi cua cac con nay, ngta dung ntn, limitations, cost, latency, capability,
+                MCP : done 
+                OpenClaw: 
+                    full features:
+                        channels
 
-        setup locally
+
+        setup locally : done
         used by 4 engineers
         target : useful ++++
         other sub-stask in confluence
@@ -54,3 +59,6 @@ to-do:
     key-words:
         gateway architecture
         webhook/cronjob 
+
+
+test pull request
