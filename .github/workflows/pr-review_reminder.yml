@@ -23,7 +23,7 @@ jobs:
             const repo = context.repo.repo;
 
             const now = Date.now();
-            const cutoffMs = 24 * 60 * 60 * 1000;
+            const cutoffMs = 30 * 60 * 1000;
 
             const prs = await github.paginate(
               github.rest.pulls.list,
