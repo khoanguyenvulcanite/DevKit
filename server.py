@@ -63,12 +63,6 @@ class MCPServer:
                 pr_number: Pull request number
             """
             return await self.get_pr_diff(repo, pr_number)
-        
-        @self.mcp.tool()
-        async def review_pr_tool(command: str) -> str:
-            """Parse slash-command input and fetch PR diff."""
-            return await self.review_pr_tool(command)
-        
 
     @staticmethod
     def _split_repo(repo: str) -> tuple[str, str]:
@@ -137,33 +131,6 @@ class MCPServer:
             raise ApiClientError("Expected raw diff text but got non-text response")
 
         return diff_text
-
-
-    async def review_pr_tool(self,command: str) -> str:
-        """Parse slash-command input and fetch PR diff."""
-        raw = command.strip()
-
-        repo = None
-        pr_number = None
-
-        if "#" in raw and "repo=" not in raw:
-            repo, pr_str = raw.split("#", 1)
-            repo = repo.strip()
-            pr_number = int(pr_str.strip())
-        else:
-            parts = raw.split()
-            for part in parts:
-                if part.startswith("repo="):
-                    repo = part[len("repo="):].strip()
-                elif part.startswith("pr_number="):
-                    pr_number = int(part[len("pr_number="):].strip())
-
-        if not repo:
-            raise ValueError('Missing repo. Use repo=owner/repo or owner/repo#123')
-        if pr_number is None:
-            raise ValueError('Missing pr_number. Use pr_number=<number> or owner/repo#123')
-
-        return await self.get_pr_diff(repo, pr_number)
 
     async def aclose(self) -> None:
         await self.client.aclose()
